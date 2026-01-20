@@ -334,8 +334,8 @@
                   "    pm.response.to.have.status(401);",
                   "});",
                   "",
-                  "pm.test(\"Response body contains 'No token provided'\", function () {",
-                  "    pm.expect(pm.response.text()).to.include(\"No token provided\");",
+                  "pm.test(\"Response body contains No token message\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"No token provided. Use Bearer token in Authorization header.\");",
                   "});"
                 ],
                 "type": "text/javascript",
