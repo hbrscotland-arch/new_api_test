@@ -414,11 +414,13 @@
               "script": {
                 "exec": [
                   "pm.test(\"Status code is 401\", function () {",
+                  "    //console.log(\"Token: \" + {my_bear_token2});",
                   "    pm.response.to.have.status(401);",
                   "});",
                   "",
-                  "pm.test(\"Response body contains 'Token has expired'\", function () {",
+                  "pm.test(\"Response body contains token has expired\", function () {",
                   "    pm.expect(pm.response.text()).to.include(\"Token has expired\");",
+                  "",
                   "});"
                 ],
                 "type": "text/javascript",
