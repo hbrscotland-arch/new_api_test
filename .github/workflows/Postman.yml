@@ -23,6 +23,11 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      - name: Run Postman collection
+      - name: Debug – list repo files
+        run: ls -R
+
+      - name: Run Postman collection with environment
         run: |
-          newman run collection.json -e environment.json 
+          newman run tests/postman/collection.json \
+            -e tests/postman/environment.json
+
