@@ -1,0 +1,549 @@
+{
+  "info": {
+    "_postman_id": "47b4023a-723b-4d07-b6b5-5c0c307bafca",
+    "name": "API Testing 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50988409",
+    "_collection_link": "https://go.postman.co/collection/50988409-47b4023a-723b-4d07-b6b5-5c0c307bafca?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Authorization",
+      "item": [
+        {
+          "name": "Valid User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "const token = jsonData.data && jsonData.data.token;",
+                  "",
+                  "pm.test(\"Token is present in the response\", function () {",
+                  "    pm.expect(token).to.be.a('String').and.not.be.empty;",
+                  "});",
+                  "",
+                  "if (token){",
+                  "    pm.environment.set(\"my_bearer_token\", token);",
+                  "    console.log(\"Token saved to environment variable 'my_bearer_token'\");",
+                  "    pm.environment.set(\"bearer_token\", token);",
+                  "    console.log(\"Token saved to environment variable 'bearer_token'as fallback\" );",
+                  "} else {",
+                  "    console.error(\"Token not found in the response at data.token\");",
+                  "}",
+                  "",
+                  "pm.test(\"User role is correct\", () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.user.role).to.equal(\"user\");",
+                  "",
+                  "});",
+                  "",
+                  "pm.test(\"Token is not empty\", () => {",
+                  "    pm.expect(token).to.not.be.empty;",
+                  "    });",
+                  "",
+                  "pm.test(\"Token is a string\", () => {",
+                  "        pm.expect(token).to.be.a('string');",
+                  "        });",
+                  "",
+                  "//verify the message \"Login successful\"",
+                  "pm.test(\"Login message is correct\", () => {",
+                  "    pm.expect(pm.response.json().message).to.equal(\"Login successful\");",
+                  "    });",
+                  "",
+                  "",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test7_user\",\n  \"password\": \"securepass123\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "const token = jsonData.data && jsonData.data.token;",
+                  "",
+                  "pm.test(\"Token is present in the response\", function () {",
+                  "    pm.expect(token).to.be.a('String').and.not.be.empty;",
+                  "});",
+                  "",
+                  "",
+                  "if (token){",
+                  "    pm.environment.set(\"my_admin_token\", token);",
+                  "    console.log(\"Token saved to environment variable 'my_admin_token'\");",
+                  "    pm.environment.set(\"admin_token\", token);",
+                  "    console.log(\"Token saved to environment variable 'admin_token'as fallback\" );",
+                  "} else {",
+                  "    console.error(\"Token not found in the response at data.token\");",
+                  "}",
+                  "",
+                  "pm.test(\"User role is correct\", () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.user.role).to.equal(\"admin\");",
+                  "",
+                  "});",
+                  "",
+                  "pm.test(\"Token is not empty\", () => {",
+                  "    pm.expect(token).to.not.be.empty;",
+                  "    });",
+                  "",
+                  "pm.test(\"Token is a string\", () => {",
+                  "        pm.expect(token).to.be.a('string');",
+                  "        });",
+                  "",
+                  "pm.test(\"Login message is correct\", () => {",
+                  "    pm.expect(pm.response.json().message).to.equal(\"Login successful\");",
+                  "    });",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 401\", function () {",
+                  "pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Login fails with invalid credentials message\", function () {",
+                  "    pm.expect(pm.response.json().message).to.eql(\"Invalid credentials\");",
+                  "});",
+                  "    ",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test3_user\",\n  \"password\": \"wrongpassword\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+          },
+          "response": []
+        },
+        {
+          "name": "current user profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const schema = {",
+                  "    type: \"object\",",
+                  "    required: [\"success\", \"data\", \"timestamp\"],",
+                  "    properties: {",
+                  "        success: { type: \"boolean\" },",
+                  "        data: {",
+                  "            type: \"object\",",
+                  "            required: [",
+                  "                \"id\",",
+                  "                \"username\",",
+                  "                \"email\",",
+                  "                \"first_name\",",
+                  "                \"last_name\",",
+                  "                \"role\",",
+                  "                \"is_active\",",
+                  "                \"created_at\"",
+                  "            ],",
+                  "            properties: {",
+                  "                id: { type: \"number\" },",
+                  "                username: { type: \"string\" },",
+                  "                email: { ",
+                  "                    type: \"string\",",
+                  "                    format: \"email\"",
+                  "                },",
+                  "                first_name: { type: \"string\" },",
+                  "                last_name: { type: \"string\" },",
+                  "                role: { type: \"string\" },",
+                  "                is_active: { ",
+                  "                    type: \"number\",",
+                  "                    enum: [0, 1]",
+                  "                },",
+                  "                created_at: { ",
+                  "                    type: \"string\",",
+                  "                    pattern: \"^\\\\d{4}-\\\\d{2}-\\\\d{2} \\\\d{2}:\\\\d{2}:\\\\d{2}$\"",
+                  "                }",
+                  "            }",
+                  "        },",
+                  "        timestamp: {",
+                  "            type: \"string\",",
+                  "            format: \"date-time\"",
+                  "        }",
+                  "    }",
+                  "};",
+                  "pm.test(\"Response schema is valid\", () => {",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});",
+                  "",
+                  "pm.test(\"User role is correct\", () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.role).to.equal(\"user\");",
+                  "",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body contains 'No token provided'\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"No token provided\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Missing authorization header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body contains 'No token provided. Use Bearer token in Authorization header'\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"No token provided. Use Bearer token in Authorization header\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Access with ExpiredToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body contains 'Token has expired'\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Token has expired\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{expired_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh API key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.environment.set(\"api_key\", pm.response.json().data.api_key);",
+                  "",
+                  "pm.test(\"API key refreshed successfully\", function () {",
+                  "    pm.expect(pm.response.json().success).to.be.true;",
+                  "    pm.expect(pm.response.json().message).to.equal(\"API key refreshed successfully\");",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "invalid-key",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-api-key",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-api-key"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
