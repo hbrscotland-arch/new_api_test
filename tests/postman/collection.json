@@ -441,13 +441,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/auth/me",
+              "raw": "{{baseUrl}}/users",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "auth",
-                "me"
+                "users"
               ]
             }
           },
