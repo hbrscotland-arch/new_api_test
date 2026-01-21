@@ -11,6 +11,136 @@
       "name": "Authorization",
       "item": [
         {
+          "name": "Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"success flag is true \", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);})",
+                  "",
+                  "",
+                  "pm.test('Response is JSON', function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "",
+                  "const responseData = pm.response.json();",
+                  "",
+                  "pm.test('Response contains user data', function () {",
+                  "    pm.expect(responseData.data.user).to.have.property('username');",
+                  "    pm.expect(responseData.data.user).to.have.property('email');",
+                  "    pm.expect(responseData.data.user).to.have.property('first_name');",
+                  "    pm.expect(responseData.data.user).to.have.property('last_name');",
+                  "});",
+                  "",
+                  "// Test: Password should NOT be in response",
+                  "pm.test('Password is not exposed in response', function () {",
+                  "    pm.expect(responseData).to.not.have.property('password');",
+                  "});",
+                  "",
+                  "pm.test('Username matches request data', function () {",
+                  "    pm.expect(responseData.data.user.username).to.eql(pm.environment.get('test_username'));",
+                  "});",
+                  "",
+                  "pm.test('Email matches request data', function () {",
+                  "    pm.expect(responseData.data.user.email).to.eql(pm.environment.get('test_email'));",
+                  "});",
+                  "",
+                  "if (responseData.token || responseData.access_token) {",
+                  "    pm.test('Response contains authentication token', function () {",
+                  "        const token = responseData.token || responseData.access_token;",
+                  "        pm.expect(token).to.be.a('string');",
+                  "        pm.expect(token.length).to.be.above(10);",
+                  "        pm.environment.set('auth_token', token);",
+                  "    });",
+                  "}",
+                  "",
+                  "pm.test('Password is not exposed in response', function () {",
+                  "    pm.expect(responseData).to.not.have.property('password');",
+                  "});",
+                  "",
+                  "if (responseData.id || responseData.user_id) {",
+                  "    pm.test('User ID exists and is valid', function () {",
+                  "        const userId = responseData.id || responseData.user_id;",
+                  "        pm.expect(userId).to.exist;",
+                  "        pm.environment.set('user_id', userId);",
+                  "    });",
+                  "}",
+                  "",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "const randomNum = Math.floor(Math.random() * 10000);",
+                  "",
+                  "const firstNames = ['John', 'Jane', 'Alex', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa'];",
+                  "const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'];",
+                  "",
+                  "const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
+                  "const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
+                  "",
+                  "pm.environment.set('test_username', `user_${timestamp}_${randomNum}`);",
+                  "pm.environment.set('test_email', `test_${timestamp}_${randomNum}@example.com`);",
+                  "pm.environment.set('test_password', 'securepass123');",
+                  "pm.environment.set('test_first_name', randomFirstName);",
+                  "pm.environment.set('test_last_name', randomLastName);",
+                  "",
+                  "console.log('Generated user data:');",
+                  "console.log('Username:', pm.environment.get('test_username'));",
+                  "console.log('Email:', pm.environment.get('test_email'));",
+                  "console.log('Name:', randomFirstName, randomLastName);",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"first_name\": \"{{test_first_name}}\",\n  \"last_name\": \"{{test_last_name}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Valid User Login",
           "event": [
             {
@@ -32,8 +162,7 @@
                   "if (token){",
                   "    pm.environment.set(\"my_bearer_token\", token);",
                   "    console.log(\"Token saved to environment variable 'my_bearer_token'\");",
-                  "    pm.environment.set(\"bearer_token\", token);",
-                  "    console.log(\"Token saved to environment variable 'bearer_token'as fallback\" );",
+                  "    ",
                   "} else {",
                   "    console.error(\"Token not found in the response at data.token\");",
                   "}",
@@ -68,6 +197,16 @@
             }
           ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [],
             "body": {
@@ -116,8 +255,8 @@
                   "if (token){",
                   "    pm.environment.set(\"my_admin_token\", token);",
                   "    console.log(\"Token saved to environment variable 'my_admin_token'\");",
-                  "    pm.environment.set(\"admin_token\", token);",
-                  "    console.log(\"Token saved to environment variable 'admin_token'as fallback\" );",
+                  "    //pm.environment.set(\"admin_token\", token);",
+                  "    //console.log(\"Token saved to environment variable 'admin_token'as fallback\" );",
                   "} else {",
                   "    console.error(\"Token not found in the response at data.token\");",
                   "}",
@@ -233,7 +372,6 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "",
                   "pm.test(\"Status code is 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
@@ -289,6 +427,11 @@
                   "    const data = pm.response.json().data;",
                   "    pm.expect(data.role).to.equal(\"user\");",
                   "",
+                  "});",
+                  "",
+                  "pm.test('Password is not in response', function () {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.expect(responseData.data).to.not.have.property('password');",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -422,7 +565,12 @@
                   "    pm.expect(pm.response.json().success).to.be.true;",
                   "    pm.expect(pm.response.json().message).to.equal(\"API key refreshed successfully\");",
                   "});",
-                  ""
+                  "",
+                  "pm.test('API key format is valid', function () {",
+                  "    const responseData = pm.response.json();",
+                  "    const apiKey = responseData.data.api_key;",
+                  "    pm.expect(apiKey).to.match(/^[a-zA-Z0-9_-]+$/);",
+                  "});"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -467,6 +615,1095 @@
               "path": [
                 "auth",
                 "refresh-api-key"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Product Search and Pagination",
+      "item": [
+        {
+          "name": "Get all products",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "//pm.environment.unset(\"category_index\");",
+                  "//pm.environment.unset(\"category_results\");",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination metadata is valid\", function () {",
+                  "",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.have.property(\"pagination\");",
+                  "    const pg = res.pagination;",
+                  "    pm.expect(pg).to.have.property(\"total\").that.is.a(\"number\");",
+                  "    pm.expect(pg).to.have.property(\"page\").that.is.a(\"number\");",
+                  "    pm.expect(pg).to.have.property(\"limit\").that.is.a(\"number\");",
+                  "    pm.expect(pg).to.have.property(\"totalPages\").that.is.a(\"number\");",
+                  "    pm.expect(pg).to.have.property(\"hasNextPage\").that.is.a(\"boolean\");",
+                  "    pm.expect(pg).to.have.property(\"hasPreviousPage\").that.is.a(\"boolean\");",
+                  "    pm.expect(res.data.length).to.be.at.most(pg.limit);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has product array\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    });",
+                  "",
+                  "",
+                  "pm.test(\"Pagination total matches data length \", function () {",
+                  "",
+                  "    const { total, totalPages } = pm.response.json().pagination;",
+                  "    if (totalPages === 1) {",
+                  "",
+                  "    pm.expect(total).to.equal(pm.response.json().data.length);}",
+                  "});",
+                  "",
+                  "/*const response = pm.response.json();",
+                  "",
+                  "",
+                  "// 2. Extract data for chaining",
+                  "if (response.data && response.data.length > 0) {",
+                  "    // Pick \"Electronics\" from the second item in your sample",
+                  "    pm.environment.set(\"category_to_filter\", response.data[1].category); ",
+                  "    // Pick \"Smartphone\" for search test",
+                  "    pm.environment.set(\"search_term\", response.data[1].name);",
+                  "}*/",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "",
+                  "// 2. Set Environment Variables",
+                  "if (response.data && response.data.length > 0) {",
+                  "    // Stores 'Electronics'",
+                  "    pm.environment.set(\"env_category\", response.data[1].category); ",
+                  "    // Stores 'Smartphone'",
+                  "    pm.environment.set(\"env_search_term\", response.data[1].name);",
+                  "}",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products?page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate the schema",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const schema = {",
+                  "    type: \"object\",",
+                  "    required: [\"success\", \"data\", \"pagination\", \"timestamp\"],",
+                  "    properties: {",
+                  "        success: { type: \"boolean\" },",
+                  "        timestamp: { type: \"string\" },",
+                  "        data: {",
+                  "            type: \"array\",",
+                  "            items: {",
+                  "                type: \"object\",",
+                  "                required: [",
+                  "                    \"id\",",
+                  "                    \"name\",",
+                  "                    \"description\",",
+                  "                    \"price\",",
+                  "                    \"category\",",
+                  "                    \"stock_quantity\",",
+                  "                    \"sku\",",
+                  "                    \"is_available\",",
+                  "                    \"created_at\",",
+                  "                    \"updated_at\"",
+                  "                ],",
+                  "                properties: {",
+                  "                    id: { type: \"number\" },",
+                  "                    name: { type: \"string\" },",
+                  "                    description: { type: \"string\" },",
+                  "                    price: { type: \"number\" },",
+                  "                    category: { type: \"string\" },",
+                  "                    stock_quantity: { type: \"number\" },",
+                  "                    sku: { type: \"string\" },",
+                  "                    is_available: { type: \"number\" },",
+                  "                    created_at: { type: \"string\" },",
+                  "                    updated_at: { type: \"string\" }",
+                  "                }",
+                  "            }",
+                  "        },",
+                  "        pagination: {",
+                  "            type: \"object\",",
+                  "            required: [",
+                  "                \"total\",",
+                  "                \"page\",",
+                  "                \"limit\",",
+                  "                \"totalPages\",",
+                  "                \"hasNextPage\",",
+                  "                \"hasPreviousPage\"",
+                  "            ],",
+                  "            properties: {",
+                  "                total: { type: \"number\" },",
+                  "                page: { type: \"number\" },",
+                  "                limit: { type: \"number\" },",
+                  "                totalPages: { type: \"number\" },",
+                  "                hasNextPage: { type: \"boolean\" },",
+                  "                hasPreviousPage: { type: \"boolean\" }",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "};",
+                  "",
+                  "pm.test(\"Response schema is valid\", () => {",
+                  "    pm.response.to.have.jsonSchema(schema);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get all products",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "https://practice-site-apis-production.up.railway.app/api/v1/products?page=1&limit=21",
+                  "protocol": "https",
+                  "host": [
+                    "practice-site-apis-production",
+                    "up",
+                    "railway",
+                    "app"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "21"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4794"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 13 Jan 2026 14:27:01 GMT"
+                },
+                {
+                  "key": "Etag",
+                  "value": "W/\"12ba-MWUoGhXYq7WwA2+irKEXK7iJe/o\""
+                },
+                {
+                  "key": "Ratelimit-Limit",
+                  "value": "100"
+                },
+                {
+                  "key": "Ratelimit-Policy",
+                  "value": "100;w=60"
+                },
+                {
+                  "key": "Ratelimit-Remaining",
+                  "value": "99"
+                },
+                {
+                  "key": "Ratelimit-Reset",
+                  "value": "60"
+                },
+                {
+                  "key": "Server",
+                  "value": "railway-edge"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Railway-Edge",
+                  "value": "railway/europe-west4-drams3a"
+                },
+                {
+                  "key": "X-Railway-Request-Id",
+                  "value": "IwTW7nAKQ4y2GGQcrJsmnA"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Laptop\",\n            \"description\": \"High-performance laptop\",\n            \"price\": 999.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 48,\n            \"sku\": \"ELEC-001\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Wireless Mouse\",\n            \"description\": \"Ergonomic wireless mouse\",\n            \"price\": 29.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 150,\n            \"sku\": \"ELEC-002\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Programming Guide\",\n            \"description\": \"Complete programming guide\",\n            \"price\": 49.99,\n            \"category\": \"Books\",\n            \"stock_quantity\": 99,\n            \"sku\": \"BOOK-001\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 4,\n            \"name\": \"T-Shirt\",\n            \"description\": \"Cotton t-shirt\",\n            \"price\": 19.99,\n            \"category\": \"Clothing\",\n            \"stock_quantity\": 200,\n            \"sku\": \"CLOT-001\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 5,\n            \"name\": \"Running Shoes\",\n            \"description\": \"Professional running shoes\",\n            \"price\": 89.99,\n            \"category\": \"Sports\",\n            \"stock_quantity\": 75,\n            \"sku\": \"SPOR-001\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 6,\n            \"name\": \"Desk Lamp\",\n            \"description\": \"LED desk lamp\",\n            \"price\": 39.99,\n            \"category\": \"Home & Garden\",\n            \"stock_quantity\": 80,\n            \"sku\": \"HOME-001\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 7,\n            \"name\": \"Smartphone\",\n            \"description\": \"Latest smartphone model\",\n            \"price\": 799.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 30,\n            \"sku\": \"ELEC-003\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 8,\n            \"name\": \"Headphones\",\n            \"description\": \"Noise-cancelling headphones\",\n            \"price\": 199.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 60,\n            \"sku\": \"ELEC-004\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 9,\n            \"name\": \"Cookbook\",\n            \"description\": \"International recipes cookbook\",\n            \"price\": 24.99,\n            \"category\": \"Books\",\n            \"stock_quantity\": 120,\n            \"sku\": \"BOOK-002\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 10,\n            \"name\": \"Jeans\",\n            \"description\": \"Classic blue jeans\",\n            \"price\": 59.99,\n            \"category\": \"Clothing\",\n            \"stock_quantity\": 90,\n            \"sku\": \"CLOT-002\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 11,\n            \"name\": \"Yoga Mat\",\n            \"description\": \"Non-slip yoga mat\",\n            \"price\": 34.99,\n            \"category\": \"Sports\",\n            \"stock_quantity\": 100,\n            \"sku\": \"SPOR-002\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 12,\n            \"name\": \"Coffee Maker\",\n            \"description\": \"Programmable coffee maker\",\n            \"price\": 79.99,\n            \"category\": \"Home & Garden\",\n            \"stock_quantity\": 45,\n            \"sku\": \"HOME-002\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 13,\n            \"name\": \"Tablet\",\n            \"description\": \"10-inch tablet\",\n            \"price\": 399.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 40,\n            \"sku\": \"ELEC-005\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 14,\n            \"name\": \"Fiction Novel\",\n            \"description\": \"Bestselling fiction novel\",\n            \"price\": 14.99,\n            \"category\": \"Books\",\n            \"stock_quantity\": 200,\n            \"sku\": \"BOOK-003\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 15,\n            \"name\": \"Winter Jacket\",\n            \"description\": \"Warm winter jacket\",\n            \"price\": 129.99,\n            \"category\": \"Clothing\",\n            \"stock_quantity\": 50,\n            \"sku\": \"CLOT-003\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 16,\n            \"name\": \"Tennis Racket\",\n            \"description\": \"Professional tennis racket\",\n            \"price\": 149.99,\n            \"category\": \"Sports\",\n            \"stock_quantity\": 35,\n            \"sku\": \"SPOR-003\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 17,\n            \"name\": \"Plant Pot\",\n            \"description\": \"Ceramic plant pot\",\n            \"price\": 19.99,\n            \"category\": \"Home & Garden\",\n            \"stock_quantity\": 150,\n            \"sku\": \"HOME-003\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 18,\n            \"name\": \"Smartwatch\",\n            \"description\": \"Fitness tracking smartwatch\",\n            \"price\": 249.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 55,\n            \"sku\": \"ELEC-006\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 19,\n            \"name\": \"Out of Stock Item\",\n            \"description\": \"This item is out of stock\",\n            \"price\": 99.99,\n            \"category\": \"Electronics\",\n            \"stock_quantity\": 0,\n            \"sku\": \"ELEC-999\",\n            \"is_available\": 1,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        },\n        {\n            \"id\": 20,\n            \"name\": \"Unavailable Product\",\n            \"description\": \"This product is unavailable\",\n            \"price\": 49.99,\n            \"category\": \"Books\",\n            \"stock_quantity\": 10,\n            \"sku\": \"BOOK-999\",\n            \"is_available\": 0,\n            \"created_at\": \"2026-01-12 12:39:41\",\n            \"updated_at\": \"2026-01-12 12:39:41\"\n        }\n    ],\n    \"pagination\": {\n        \"total\": 20,\n        \"page\": 1,\n        \"limit\": 21,\n        \"totalPages\": 1,\n        \"hasNextPage\": false,\n        \"hasPreviousPage\": false\n    },\n    \"timestamp\": \"2026-01-13T14:27:01.928Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Filter by category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"All products belong to Electronics category\", () => {",
+                  "response.data.forEach(product => {",
+                  "pm.expect(product.category).to.eql(\"Electronics\");",
+                  "   });",
+                  "});",
+                  "",
+                  "pm.test(\"Each product contains required fields\", () => {",
+                  "    response.data.forEach(product => {",
+                  "        pm.expect(product).to.include.all.keys(",
+                  "            \"id\", \"name\", \"description\", \"price\", \"category\", \"stock_quantity\", \"sku\", \"is_available\", \"created_at\", \"updated_at\"",
+                  "        );",
+                  "    });",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?category={{env_category}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "{{env_category}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter by Non-Existent category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Non-existent category returns pagination with total 0\", () => {",
+                  "    pm.expect(response.pagination.total).to.eql(0);",
+                  "});",
+                  "pm.test(\"Non-existent category returns pagination with hasNextPage false\", () => {",
+                  "    pm.expect(response.pagination.hasNextPage).to.eql(false);",
+                  "});",
+                  "pm.test(\"Non-existent category returns pagination with hasPreviousPage false\", () => {",
+                  "    pm.expect(response.pagination.hasPreviousPage).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?category=DoesNotExist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "DoesNotExist"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10\n",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filter by price range",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"All products have a price between 0 and 100\", function () {",
+                  "    response.data.forEach(product => {",
+                  "        pm.expect(product.price).to.be.at.least(0);",
+                  "        pm.expect(product.price).to.be.at.most(100);",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"Pagination data is correct\", function () {",
+                  "    pm.expect(response.pagination.total).to.equal(13);",
+                  "",
+                  " });",
+                  "",
+                  " pm.test(\"Non-existent category returns pagination with hasNextPage false\", () => {",
+                  "    pm.expect(response.pagination.hasNextPage).to.eql(true);",
+                  " });",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?min_price=0&max_price=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "min_price",
+                  "value": "0"
+                },
+                {
+                  "key": "max_price",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response body contains 'Electronics'\", function () {",
+                  "    pm.expect(pm.response.text()).to.include('Electronics');",
+                  "});",
+                  "",
+                  "pm.test(\"Verify the stock_quantity\", function () {",
+                  "    pm.expect(pm.response.json().data[0].stock_quantity).to.equal(30);",
+                  "});",
+                  " ",
+                  "pm.test(\"Verify the price\", function () {",
+                  "    pm.expect(pm.response.json().data[0].price).to.equal(799.99);",
+                  "});",
+                  "",
+                  "pm.test(\"Verify is_available \", function () {",
+                  "    pm.expect(pm.response.json().data[0].is_available).to.equal(1);",
+                  "});",
+                  "",
+                  "pm.test(\"Search result matches environment term\", () => {",
+                  "    const response = pm.response.json();",
+                  "    const term = pm.environment.get(\"env_search_term\");",
+                  "    ",
+                  "    pm.expect(response.data[0].name).to.include(term);",
+                  "});",
+                  "",
+                  "pm.environment.unset(\"env_category\");",
+                  "pm.environment.unset(\"env_search_term\");",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?search={{env_search_term}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "{{env_search_term}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sort by price",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const responseData = pm.response.json();",
+                  "",
+                  "pm.test(\"Verify the price is in decending order\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var prices = jsonData.data.map(item => item.price);",
+                  "    for (var i = 0; i < prices.length - 1; i++) {",
+                  "        pm.expect(prices[i]).to.be.greaterThan(prices[i + 1]);",
+                  "    }",
+                  "    });",
+                  "",
+                  "//pm.test(\"Verify the prices don't show zero or negative numbers\")",
+                  "pm.test('All product prices are positive numbers', function () {",
+                  "    responseData.data.forEach((product, index) => {",
+                  "        pm.expect(product.price, `Product ${index} (${product.name}): price should be positive`).to.be.above(0);",
+                  "    });",
+                  "});",
+                  "",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?sort_by=price&sort_order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sort_by",
+                  "value": "price"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Combine filters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Verify the stock_quantity is sorted in ascending order\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const stockQuantities = jsonData.data.map(item => item.stock_quantity);",
+                  "    for (let i = 0; i < stockQuantities.length - 1; i++) {",
+                  "        pm.expect(stockQuantities[i]).to.be.at.most(stockQuantities[i + 1]);",
+                  "    }",
+                  "    });",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "    pm.test(\"All products have a price minimum 100\", function () {",
+                  "        pm.expect(response.data.every(product => product.price >= 100)).to.be.true;",
+                  "    });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?category=Electronics&min_price=100&sort_by=stock_quantity&sort_order=asc&page=1&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Electronics"
+                },
+                {
+                  "key": "min_price",
+                  "value": "100"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "stock_quantity"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "asc"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Boundary Test - Invalid Page",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Response handles invalid page gracefully', function () {",
+                  "   pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const responseData = pm.response.json();",
+                  "    pm.test('Products array is empty or valid', function () {",
+                  "        pm.expect(responseData.data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=3&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "3"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Boundary Test - Large Limit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Validate response status is 200",
+                  "pm.test('Response status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Parse response once for all tests",
+                  "const responseData = pm.response.json();",
+                  "const pagination = responseData.pagination;",
+                  "",
+                  "// 2. Validate response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    pm.expect(responseData).to.have.property('success');",
+                  "    pm.expect(responseData).to.have.property('data').that.is.an('array');",
+                  "    pm.expect(responseData).to.have.property('pagination').that.is.an('object');",
+                  "});",
+                  "    ",
+                  "    // hasNextPage should be true if there are more pages",
+                  "    pm.expect(pagination.hasNextPage, 'hasNextPage is correct').to.eql(pagination.page < pagination.totalPages);",
+                  "    ",
+                  "    // hasPreviousPage should be true if not on first page",
+                  "    pm.expect(pagination.hasPreviousPage, 'hasPreviousPage is correct').to.eql(pagination.page > 1);",
+                  "",
+                  "",
+                  "",
+                  "// 8. Validate prices are positive numbers",
+                  "pm.test('All product prices are positive numbers', function () {",
+                  "    responseData.data.forEach((product, index) => {",
+                  "        pm.expect(product.price, `Product ${index} (${product.name}): price should be positive`).to.be.above(0);",
+                  "    });",
+                  "});",
+                  "",
+                  "// 9. Validate stock quantities are non-negative",
+                  "pm.test('All stock quantities are non-negative', function () {",
+                  "    responseData.data.forEach((product, index) => {",
+                  "        pm.expect(product.stock_quantity, `Product ${index} (${product.name}): stock_quantity should be non-negative`).to.be.at.least(0);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{my_bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Idempotency",
+      "item": [
+        {
+          "name": "idempotency key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "",
+                  "",
+                  "pm.test(\"First request succeeded\", function () {",
+                  "    pm.response.to.have.status(201,\"Created\");",
+                  "});",
+                  "",
+                  "// Verify the response body",
+                  "pm.test(\"verify message in the response body\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Request processed successfully\", \"test1\");",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "//Generate a New key only if it doesnt exist",
+                  "",
+                  "if (!pm.environment.get(\"idempotency_key\")) {",
+                  "  pm.environment.set(",
+                  "    \"idempotency_key\",",
+                  "    `idem-${Date.now()}-${Math.floor(Math.random() * 1000)}`",
+                  "  );",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": \"test1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/test/idempotent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "idempotent"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Repeat same request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Second request succeeded\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Verify the success field in the response body\", function () {",
+                  "    pm.expect(pm.response.json().success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Verify the message in the response body\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Response from cache (idempotent request)\", \"test1\");",
+                  "});",
+                  " // To keep next iteration clean",
+                  "pm.environment.unset(\"idempotency_key\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": \"test1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/test/idempotent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "idempotent"
               ]
             }
           },
