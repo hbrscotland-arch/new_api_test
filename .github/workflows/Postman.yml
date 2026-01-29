@@ -6,6 +6,8 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'   # runs daily at 6:00 PM GMT
 
 jobs:
   postman-tests:
@@ -30,4 +32,5 @@ jobs:
         run: |
           newman run tests/postman/collection.json \
             -e tests/postman/environment.json
+
 
