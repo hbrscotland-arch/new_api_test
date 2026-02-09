@@ -37,10 +37,64 @@
 			"value": "",
 			"type": "any",
 			"enabled": true
+		},
+		{
+			"key": "test_username",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_email",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_password",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_first_name",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_last_name",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "category_to_filter",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "search_term",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "env_category",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "env_search_term",
+			"value": "",
+			"type": "any",
+			"enabled": true
 		}
 	],
 	"color": null,
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2026-01-21T16:50:50.647Z",
-	"_postman_exported_using": "Postman/11.81.2"
+	"_postman_exported_at": "2026-02-09T20:49:14.795Z",
+	"_postman_exported_using": "Postman/11.83.5"
 }

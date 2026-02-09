@@ -57,7 +57,7 @@
                   "        const token = responseData.token || responseData.access_token;",
                   "        pm.expect(token).to.be.a('string');",
                   "        pm.expect(token.length).to.be.above(10);",
-                  "        pm.environment.set('auth_token', token);",
+                  "        //pm.environment.set('auth_token', token);",
                   "    });",
                   "}",
                   "",
@@ -69,7 +69,7 @@
                   "    pm.test('User ID exists and is valid', function () {",
                   "        const userId = responseData.id || responseData.user_id;",
                   "        pm.expect(userId).to.exist;",
-                  "        pm.environment.set('user_id', userId);",
+                  "        //pm.environment.set('user_id', userId);",
                   "    });",
                   "}",
                   "",
@@ -790,22 +790,12 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/products?page=2&limit=5",
+              "raw": "{{baseUrl}}/products",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "products"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "2"
-                },
-                {
-                  "key": "limit",
-                  "value": "5"
-                }
               ]
             }
           },
@@ -1192,7 +1182,7 @@
                   "",
                   " });",
                   "",
-                  " pm.test(\"Non-existent category returns pagination with hasNextPage false\", () => {",
+                  " pm.test(\"Non-existent category returns pagination with hasNextPage true\", () => {",
                   "    pm.expect(response.pagination.hasNextPage).to.eql(true);",
                   " });",
                   ""
@@ -2144,7 +2134,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{bearer_token}}",
+                  "value": "{{my_bearer_token}}",
                   "type": "string"
                 }
               ]
@@ -2165,7 +2155,7 @@
           "response": []
         },
         {
-          "name": "Request JSON response (default) Copy",
+          "name": "Request JSON response",
           "event": [
             {
               "listen": "test",
@@ -2198,7 +2188,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{bearer_token}}",
+                  "value": "{{my_bearer_token}}",
                   "type": "string"
                 }
               ]
@@ -2252,7 +2242,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{bearer_token}}",
+                  "value": "{{my_bearer_token}}",
                   "type": "string"
                 }
               ]
